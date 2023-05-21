@@ -17,7 +17,7 @@ with DAG(
     "Raw_Material",
     description="Only crawl the data on cnyes so far",
     #schedule="@daily",
-    schedule_interval="0 21 5 * *",
+    schedule_interval="0 21 */5 * *",
     start_date=pendulum.datetime(2023, 1, 12,9,0, tz="Asia/Taipei"),
     catchup=False,
     tags=["Scarpy",'Raw Material'],

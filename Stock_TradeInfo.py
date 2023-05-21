@@ -21,7 +21,7 @@ with DAG(
 
     description="Today's info",
     #schedule="@daily",
-    schedule_interval="0 21 * * *",
+    schedule_interval="0 21 * * 1,2,3,4,5",
     start_date=pendulum.datetime(2023, 1, 12,9,0, tz="Asia/Taipei"),
     catchup=False,
     tags=['Stock-Daily'],
@@ -46,22 +46,53 @@ with DAG(
         op_kwargs={'crawler_type':'TWSE','crawler_name':'OTC_Day_Transaction_Info'}
     )
 
-    day_trade= ExternalPythonOperator(
+    day_trade = ExternalPythonOperator(
         task_id='Fetch_Day_Trade',
         python=AT_WEB_PATH,
         python_callable=call_crawler,
         op_kwargs={'crawler_type':'TWSE','crawler_name':'All_Day_Trade'}
     )
 
-    sel_broker = BashOperator(
-        task_id = "sel_broker",
-        bash_command="source /home/wenchin/AT_WEB/bin/activate;"\
-        "cd /mnt/c/Users/s3309/AT/Financial_data_crawler/Scrapy/sel_broker/sel_broker;"\
-        "scrapy crawl sel_broker"
-    )
 
     [listed_trade_info, otc_trade_info, day_trade]
 
+with DAG(
+    
+    "Parse_sel_broker",
+
+    description="Today's info",
+    #schedule="@daily",
+    schedule_interval="0 18 * * 1,2,3,4,5",
+    start_date=pendulum.datetime(2023, 1, 12,9,0, tz="Asia/Taipei"),
+    catchup=False,
+    tags=['Sel Broker','Today'],
+
+) as dag:
+
+    def sel_broker_trans():
+
+        from Financial_data_crawler.DataReader.Selenium import SelBroker
+        crawler = SelBroker()
+        crawler.parse()
+
+    def save_sel_broker_trans():
+        from Financial_data_crawler.DataReader.Selenium import SelBrokerDataCrawler
+        import asyncio
+        asyncio.run(SelBrokerDataCrawler.run())
+
+    sel_broker = ExternalPythonOperator(
+        task_id='Today_Sel_Broker',
+        python=AT_WEB_PATH,
+        python_callable=sel_broker_trans,
+    )
+
+    save_data = ExternalPythonOperator(
+        task_id='Save_Sel_Broker',
+        python=AT_WEB_PATH,
+        python_callable=save_sel_broker_trans,
+    )
+
+    sel_broker >> save_data
 
 with DAG(
     
@@ -69,16 +100,77 @@ with DAG(
 
     description="Today's info",
     #schedule="@daily",
-    schedule_interval="0 12,4 * * *",
+    schedule_interval="@once",
     start_date=pendulum.datetime(2023, 1, 12,9,0, tz="Asia/Taipei"),
     catchup=False,
     tags=['Sel Broker'],
 
 ) as dag:
+    
+    def past_sel_broker_trans():
 
-    sel_broker = BashOperator(
-        task_id = "sel_broker",
-        bash_command="source /home/wenchin/AT_WEB/bin/activate;"\
-        "cd /mnt/c/Users/s3309/AT/Financial_data_crawler/Scrapy/sel_broker/sel_broker;"\
-        "scrapy crawl sel_broker"
+        from Financial_data_crawler.DataReader.Selenium import SelBroker
+        crawler = SelBroker(auto_date=True)
+        print(crawler.urls)
+        crawler.parse()
+
+    sel_broker = ExternalPythonOperator(
+        task_id='Past_Sel_Broker',
+        python=AT_WEB_PATH,
+        python_callable=past_sel_broker_trans,
     )
+
+    save_data = ExternalPythonOperator(
+        task_id='Save_Sel_Broker',
+        python=AT_WEB_PATH,
+        python_callable=save_sel_broker_trans,
+    )
+
+    sel_broker >>  save_data
+
+with DAG(
+    
+    "SpreadShareholdings",
+    # These args will get passed on to each operator
+    # You can override them on a per-task basis during operator initialization
+
+    description="Collect Spread Shareholdings",
+    #schedule="@daily",
+    schedule_interval="0 21 * * 6",
+    start_date=pendulum.datetime(2023, 2, 25, 21,0, tz="Asia/Taipei"),
+    catchup=False,
+    tags=['Stock-Weekly'],
+
+) as dag:
+    
+    def call_crawler(crawler_type='',crawler_name=''):
+
+        from Financial_data_crawler import scheduler
+        scheduler.main(crawler_type,crawler_name)
+
+
+    day_trade= ExternalPythonOperator(
+    task_id='Spread_Shareholdings',
+    python=AT_WEB_PATH,
+    python_callable=call_crawler,
+    op_kwargs={'crawler_type':'TWSE','crawler_name':'Listed_Spread_Shareholdings'}
+    )
+
+
+with DAG(
+    
+    "Save_sel_broker_data",
+
+    #schedule="@daily",
+    schedule_interval="0 0,6 * * *",
+    start_date=pendulum.datetime(2023, 1, 12,9,0, tz="Asia/Taipei"),
+    catchup=False,
+    tags=['Sel Broker'],
+
+) as dag:
+    save_data = ExternalPythonOperator(
+        task_id='Save_Sel_Broker',
+        python=AT_WEB_PATH,
+        python_callable=save_sel_broker_trans,
+    )
+    save_data
