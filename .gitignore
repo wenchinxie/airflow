@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+# Chrome
+google-chrome-stable_current_amd64.deb
 
 # data
 *.txt
