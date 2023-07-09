@@ -6,8 +6,15 @@ __pycache__/
 # C extensions
 *.so
 
-chromedriver
+
+# Chrome
+google-chrome-stable_current_amd64.deb
+
+# data
 *.txt
+
+# Chromedrive
+chromedriver
 
 # Distribution / packaging
 .Python
