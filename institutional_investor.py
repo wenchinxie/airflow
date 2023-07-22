@@ -4,9 +4,6 @@ from airflow import DAG
 
 with DAG(
     "Institutional_investor",
-    # These args will get passed on to each operator
-    # You can override them on a per-task basis during operator initialization
-    description="",
     schedule_interval="30 22 * * *",
     start_date=pendulum.datetime(2023, 1, 12, 9, 0, tz="Asia/Taipei"),
     catchup=False,
