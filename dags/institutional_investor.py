@@ -106,6 +106,7 @@ with DAG(
                 last_modified_date = get_file_last_modified_date(file_path)
                 print(file_name, last_modified_date)
                 if last_modified_date == today:
+                    print("real---", file_name, last_modified_date)
                     df = get_institutional_investor_df(download_foler, file_name)
                     if all_data.empty:
                         all_data = df
