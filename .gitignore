@@ -18,6 +18,7 @@ airflow-webserver
 logs/
 webserver_config.py
 LICENSE*
+*.pid
 
 # Chrome
 google-chrome-stable_current_amd64.deb
@@ -149,3 +150,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# js package
+node_modules/
+package*.json
