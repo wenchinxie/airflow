@@ -104,8 +104,10 @@ class RawMaterialDownloaderMiddleware:
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
 
+
 class MaxRetriesExceeded(Exception):
     pass
+
 
 class CustomRetryMiddleware(RetryMiddleware):
     def __init__(self, settings):
@@ -121,10 +123,10 @@ class CustomRetryMiddleware(RetryMiddleware):
             else:
                 self.domain_errors[domain] = 1
             if self.domain_errors[domain] >= self.max_domain_errors:
-                spider.logger.debug(f"Maximum number of 504 errors exceeded for {domain}")
+                spider.logger.debug(
+                    f"Maximum number of 504 errors exceeded for {domain}"
+                )
                 raise MaxRetriesExceeded()
             spider.logger.debug(f"Retrying {request.url} due to 504 error")
             return self._retry(request, response.status, spider) or response
         return super().process_response(request, response, spider)
-
-
