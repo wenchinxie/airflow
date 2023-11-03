@@ -13,3 +13,9 @@ with DAG(
     def parse_sci():
         from crawler.raw_material.raw_material.spiders.sci import SciSpider
         from scrapy.crawler import CrawlerProcess
+        from scrapy.utils.project import get_project_settings
+
+        settings = get_project_settings()
+        process = CrawlerProcess(settings)
+        process.crawl(SciSpider)
+        process.start()
