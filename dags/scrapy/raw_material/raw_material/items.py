@@ -1,12 +1,9 @@
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
-
-import scrapy
+from dataclasses import dataclass
+from datetime import datetime
 
 
-class RawMaterialItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+@dataclass
+class RawMaterialItem:
+    date: datetime.date
+    material_name: str
+    price: float
