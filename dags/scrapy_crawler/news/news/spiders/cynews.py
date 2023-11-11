@@ -6,9 +6,6 @@ from datetime import datetime
 from typing import List
 import requests
 from news.items import CynewsItem
-from Financial_data_crawler.db.clients import MongoClient
-from Financial_data_crawler.db.NewsModels import Cynes_News
-from Financial_data_crawler.DataCleaner import news_cleaner
 
 
 def get_timestamp(date_str: str) -> str:
@@ -33,8 +30,8 @@ def get_urls(start: int, end: int) -> List[str]:
         content = json.loads(requests.get(base_url, timeout=60).text)
         last_page = content["items"]["last_page"]
 
-        for page in range(1, last_page + 1):
-            linkage = base_url + str(page)
+        for page in range(last_page):
+            linkage = base_url + str(page + 1)
             content = json.loads(requests.get(linkage, timeout=60).text)
 
             for newsid in content["items"]["data"]:

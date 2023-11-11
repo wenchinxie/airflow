@@ -1,41 +1,36 @@
 from mongoengine import DateTimeField, StringField, ListField, Document
 from itemadapter import ItemAdapter
-from airflow.providers.mongo.hooks.mongo import MongoHook
+from mongoengine import connect, disconnect
+from dataclasses import asdict
 
 
-class Cynes_News(Document):
-    Date = DateTimeField()
-    Headline = StringField()
-    Tags = StringField()
-    Content = StringField()
+class CynesNews(Document):
+    date = DateTimeField()
+    headline = StringField()
+    tags = ListField()
+    content = StringField()
 
-
-class RawMaterialPipeline:
-    def process_item(self, item, spider):
-        item_dict = ItemAdapter(item).asdict()
-        raw_material = RawMaterial(**item_dict)
-        raw_material.save()
-        return item
+    meta = {"shard_key": ("date", "headline"), "indexes": [("date", "headline")]}
 
 
 class MongoPipeline:
-    doc_name = "raw_material"
-
-    def __init__(self, mongo_host, mongo_username, mongo_password):
-        self.conn = None
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        return cls()
+    _doc_name = "News"
 
     def open_spider(self, spider):
-        self.client = MongoHook(db=self.doc_name).get_conn()
+        username = spider.settings.get("MONGO_USERNAME")
+        password = spider.settings.get("MONGO_PASSWORD")
+        connect(
+            db=self._doc_name,
+            username=username,
+            password=password,
+            host="localhost",
+        )
 
     def close_spider(self, spider):
-        self.conn.close()
+        disconnect()
 
     def process_item(self, item, spider):
         item_dict = ItemAdapter(item).asdict()
-        raw_material = RawMaterial(**item_dict)
-        raw_material.save()
+        news = CynesNews(**item_dict)
+        news.save()
         return item
