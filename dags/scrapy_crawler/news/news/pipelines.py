@@ -10,7 +10,7 @@ class CynesNews(Document):
     tags = ListField()
     content = StringField()
 
-    meta = {"shard_key": ("date", "headline"), "indexes": [("date", "headline")]}
+    meta = {"shard_key": ("date"), "indexes": [("date", "headline")]}
 
 
 class MongoPipeline:
@@ -31,6 +31,7 @@ class MongoPipeline:
 
     def process_item(self, item, spider):
         item_dict = ItemAdapter(item).asdict()
-        news = CynesNews(**item_dict)
-        news.save()
+        CynesNews.objects(
+            date=item_dict["date"], headline=item_dict["headline"]
+        ).modify(upsert=True, **item_dict)
         return item

@@ -13,7 +13,10 @@ def get_timestamp(date_str: str) -> str:
 
 
 def get_start_and_end_time(start_dt_str: str, end_dt_str: str):
-    if not (start_dt_str and end_dt_str):
+    if (
+        not (start_dt_str and end_dt_str)
+        or start_dt_str == end_dt_str == pendulum.today().to_date_string()
+    ):
         today_timestamp = pendulum.today().timestamp()
         start, end = today_timestamp, today_timestamp - 86400
     else:
@@ -24,8 +27,8 @@ def get_start_and_end_time(start_dt_str: str, end_dt_str: str):
 def get_urls(start: int, end: int) -> List[str]:
     urls = []
 
-    while start >= end:
-        base_url = f"https://news.cnyes.com/api/v3/news/category/tw_stock?startAt={start-86400}&endAt={start}&limit=30&page="
+    while end >= start:
+        base_url = f"https://news.cnyes.com/api/v3/news/category/tw_stock?startAt={end-86400}&endAt={end}&limit=30&page="
         url = base_url + "1"
         content = json.loads(requests.get(base_url, timeout=60).text)
         last_page = content["items"]["last_page"]
@@ -39,7 +42,7 @@ def get_urls(start: int, end: int) -> List[str]:
                 if not url in urls:
                     urls.append(url)
 
-        start -= 86400
+        end -= 86400
 
     return urls
 
