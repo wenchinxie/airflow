@@ -10,15 +10,14 @@ __pycache__/
 .vscode/
 
 # Airflow
-airflow-scheduler
 airflow.cfg
 airflow.db
-airflow-webserver
 .idea/
 logs/
 webserver_config.py
 LICENSE*
 *.pid
+airflow-*
 
 # Chrome
 google-chrome-stable_current_amd64.deb
