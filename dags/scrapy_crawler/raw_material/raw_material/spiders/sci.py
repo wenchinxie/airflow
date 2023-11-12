@@ -1,18 +1,23 @@
 from typing import Union
 import re
+from datetime import datetime
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from raw_material.items import RawMaterialItem
 
 
 class SciSpider(CrawlSpider):
-    name = "sci.com"
+    name = "sci"
     allowed_domains = ["www.sci99.com"]
 
     start_urls = ["https://www.sci99.com/monitor-94911214-0.html"]
-    rules = Rule(
-        LinkExtractor(allow=(r"monitor-\d{1,}.*\.html")), callback="parse_item"
-    )
+
+    rules = [
+        Rule(
+            LinkExtractor(allow=(r"monitor-\d{1,}.*\.html",)),
+            callback="parse_item",
+        )
+    ]
 
     def clean(self, text, convert_to_float: bool = False) -> Union[str, float]:
         """remove all whitespace characters
@@ -32,7 +37,8 @@ class SciSpider(CrawlSpider):
         return striped_str
 
     def parse_item(self, response):
-        material_mame = self.clean(
+        self.logger.info("start to parse----------------")
+        material_name = self.clean(
             response.xpath('//div[@class="detect_title"]/h2/text()').get()
         )
 
@@ -45,6 +51,9 @@ class SciSpider(CrawlSpider):
             self.clean(row.xpath("td/a/text()").get(), convert_to_float=True)
             for row in table_rows
         ]
+
         for date, price in zip(dates, prices):
-            if re.match(r"\d{4}-\d{1,2}-\d{1,2}", date):
-                yield RawMaterialItem(date, material_mame, price)
+            if re.search(r"\d{4}-\d{2}-\d{1,}", date):
+                yield RawMaterialItem(
+                    datetime.strptime(date, "%Y-%m-%d").date(), material_name, price
+                )

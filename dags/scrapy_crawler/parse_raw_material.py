@@ -1,21 +1,23 @@
 import pendulum
-from airflow import DAG
+from airflow.decorators import dag
+from scrapy_crawler.utils import get_scrapy_crawl_command
+from airflow.operators.bash import BashOperator
 
 
-with DAG(
+@dag(
     "scrapy__parse_raw_material_from_sci",
     schedule="0 21 */5 * *",
     start_date=pendulum.datetime(2023, 1, 12, 9, 0, tz="Asia/Taipei"),
     catchup=False,
     tags=["Scarpy", "Raw Material"],
-) as dag:
+)
+def parse_sci_raw_material():
+    folder_name = "raw_material"
+    spider = "sci"
 
-    def parse_sci():
-        from crawler.raw_material.raw_material.spiders.sci import SciSpider
-        from scrapy.crawler import CrawlerProcess
-        from scrapy.utils.project import get_project_settings
+    command = get_scrapy_crawl_command(folder_name, folder_name, spider, "")
+    parse_sci = BashOperator(task_id="parse_sci_raw_material", bash_command=command)
+    parse_sci
 
-        settings = get_project_settings()
-        process = CrawlerProcess(settings)
-        process.crawl(SciSpider)
-        process.start()
+
+to_parse = parse_sci_raw_material()

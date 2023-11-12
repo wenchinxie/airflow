@@ -1,11 +1,9 @@
-from mongoengine import DateTimeField, StringField, ListField, Document
 from itemadapter import ItemAdapter
-from mongoengine import connect, disconnect
-from dataclasses import asdict
+from mongoengine import connect, disconnect, DateField, StringField, ListField, Document
 
 
 class CynesNews(Document):
-    date = DateTimeField()
+    date = DateField()
     headline = StringField()
     tags = ListField()
     content = StringField()
