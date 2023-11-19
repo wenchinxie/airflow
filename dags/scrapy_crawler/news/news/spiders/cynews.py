@@ -18,7 +18,7 @@ def get_start_and_end_time(start_dt_str: str, end_dt_str: str):
         or start_dt_str == end_dt_str == pendulum.today().to_date_string()
     ):
         today_timestamp = pendulum.today().timestamp()
-        start, end = today_timestamp, today_timestamp - 86400
+        start, end = today_timestamp - 86400, today_timestamp
     else:
         start, end = get_timestamp(start_dt_str), get_timestamp(end_dt_str)
     return int(round(start)), int(round(end))

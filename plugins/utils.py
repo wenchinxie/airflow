@@ -1,6 +1,5 @@
 import sys
 import os
-
 from airflow.plugins_manager import AirflowPlugin
 
 
