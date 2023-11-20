@@ -32,7 +32,7 @@ def get_rename_cols_and_skiprows(investor_type):
 
     common_dict = {
         "資料日期": "date",
-        "代號": "stock_id",
+        "代號": "stock_code",
         "名稱": "stock_name",
         "外資及陸資不含外資自營商買賣超股數": "ForeignInvestor",
         "外資自營商買賣超股數": "ForeignDealer_self",
@@ -47,10 +47,10 @@ def clean_df(df, renamed_cols_mapping):
     renamed_cols = list(renamed_cols_mapping.values())
     df.rename(columns=renamed_cols_mapping, inplace=True)
     df = df.dropna(subset=["stock_name"])
-    df["stock_id"] = df["stock_id"].replace(r"\D", "", regex=True)
+    df["stock_code"] = df["stock_code"].replace(r"\D", "", regex=True)
 
     cleaned_cols = [
-        col for col in renamed_cols if col not in ("stock_id", "stock_name", "date")
+        col for col in renamed_cols if col not in ("stock_code", "stock_name", "date")
     ]
     df[cleaned_cols] = df[cleaned_cols].replace(r",", "", regex=True).astype(int)
 
@@ -92,7 +92,7 @@ def get_concat_listed_ii_df(download_folder: str, data_lake: str):
                 all_data = df
             else:
                 all_data = all_data.merge(
-                    df, on=["stock_name", "stock_id", "date"], how="left"
+                    df, on=["stock_name", "stock_code", "date"], how="left"
                 )
 
         move_to = os.path.join(

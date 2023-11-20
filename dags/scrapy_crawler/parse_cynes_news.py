@@ -31,7 +31,6 @@ def parse_cynes_news():
     args = get_args()
 
     command = get_scrapy_crawl_command(folder_name, folder_name, spider, args)
-    print(command)
     parse_news = BashOperator(task_id="parse_cynes", bash_command=command)
     parse_news
 
