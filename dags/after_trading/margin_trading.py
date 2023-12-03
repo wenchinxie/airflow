@@ -2,16 +2,18 @@ import pendulum
 from airflow import DAG
 
 
-with DAG(
-    "Margin_trading",
-    # These args will get passed on to each operator
-    # You can override them on a per-task basis during operator initialization
-    description="",
-    schedule_interval="30 22 * * *",
-    start_date=pendulum.datetime(2023, 1, 12, 9, 0, tz="Asia/Taipei"),
-    catchup=False,
-    tags=["margin_trading"],
-) as dag:
+import pendulum
+from airflow.decorators import dag, task
+from airflow.operators.python import PythonOperator
+
+
+@dag(
+    "after_trading__margin_tradings",
+    schedule="30 22 * * *",
+    start_date=pendulum.datetime(2023, 11, 19, 9, 0, tz="Asia/Taipei"),
+    tags=["after_trading"],
+)
+def parse_margin_trading_after_trading():
     from airflow.operators.python import ExternalPythonOperator
     from airflow.configuration import conf
     from router import get_db_conn, upsert_to_db, get_upsert_query
