@@ -8,6 +8,21 @@ from bs4 import BeautifulSoup
 from faker import Faker
 
 from airflow.plugins_manager import AirflowPlugin
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+
+
+def import_data_to_postgres(table, df, replace_index=["stock_code", "occur_date"]):
+    hook = PostgresHook(postgres_conn_id="postgres_investment")
+    values = list(df.itertuples(index=False, name=None))
+    cols = [f'"{col}"' for col in df.columns.to_list()]
+    hook.insert_rows(
+        table,
+        values,
+        cols,
+        commit_every=1000,
+        replace=True,
+        replace_index=replace_index,
+    )
 
 
 def add_relative_path_to_sys(relative_path: str):
