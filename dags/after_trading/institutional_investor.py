@@ -1,11 +1,12 @@
 import pendulum
+
 from airflow.decorators import dag, task
 from airflow.operators.python import PythonOperator
 
 
 @dag(
     "after_trading__instituional_investors",
-    schedule="0 21 * * *",
+    schedule="0 22 * * 1,2,3,4,5",
     start_date=pendulum.datetime(2023, 11, 19, 9, 0, tz="Asia/Taipei"),
     tags=["after_trading"],
 )
@@ -17,8 +18,9 @@ def parse_instituional_investors_after_trading():
             get_concat_listed_ii_df,
             get_otc_ii_df,
         )
-        from airflow.providers.postgres.hooks.postgres import PostgresHook
+
         from airflow.configuration import conf
+        from airflow.providers.postgres.hooks.postgres import PostgresHook
 
         download_folder = conf.get("core", "download_folder")
         data_lake = conf.get("at_web", "data_lake")

@@ -1,57 +1,35 @@
 import pendulum
+
 from airflow import DAG
-
-
-import pendulum
 from airflow.decorators import dag, task
-from airflow.operators.python import PythonOperator
 
 
 @dag(
     "after_trading__margin_tradings",
-    schedule="30 22 * * *",
+    schedule="30 22 * * 1,2,3,4,5",
     start_date=pendulum.datetime(2023, 11, 19, 9, 0, tz="Asia/Taipei"),
     tags=["after_trading"],
 )
 def parse_margin_trading_after_trading():
-    from airflow.operators.python import ExternalPythonOperator
-    from airflow.configuration import conf
-    from router import get_db_conn, upsert_to_db, get_upsert_query
+    table_name = "margin_trading"
 
-    def save_margin_trading(get_db_conn, upsert_to_db, get_upsert_query, conf_func):
-        import pandas as pd
+    @task(task_id="create_table_if_not_exists")
+    def create_table():
+        from database import utils
 
-        from Financial_data_crawler.DataReader.DataFrame import DataFrame
-        from Financial_data_crawler.DataCleaner.twse_cleaner import (
-            TWListed_opendata_cleaner,
-            TWOTC_opendata_cleaner,
-        )
+        utils.create_table_if_not_exists(table_name)
 
-        mt_otc = DataFrame.get_raw_data(
-            conf_func.get("data_api", "otc_margintrading"), parse_dates=["資料日期"]
-        )
+    @task(task_id="save_margin_trading")
+    def save_margin_trading():
+        from after_trading.processor import marging_trading
+        from after_trading.processor.utils import import_data_to_postgres
 
-        cleaned_otc_df = TWOTC_opendata_cleaner.margin_trading_cleaner(mt_otc)
-        mt_listed = DataFrame.get_raw_data(
-            conf_func.get("data_api", "listed_margintrading")
-        ).fillna(0)
-        cleaned_listed_df = TWListed_opendata_cleaner.margin_trading_cleaner(mt_listed)
+        for listed in [True, False]:
+            df = marging_trading.get_listed_margin_trading_data(listed=listed)
+            if not df.empty:
+                import_data_to_postgres(table_name, df)
 
-        upload_df = pd.concat([cleaned_listed_df, cleaned_otc_df])
-        upload_df["date"].fillna(method="bfill", inplace=True)
+    create_table() >> save_margin_trading()
 
-        mysql_conn = get_db_conn("mysql_address")
-        conflict_cols = ["date", "stock_id"]
-        query = get_upsert_query(
-            upload_df, "dashboard_margintrading", ",".join(conflict_cols)
-        )
-        upsert_to_db(mysql_conn, upload_df, query)
 
-    upsert_margin_trading_to_db = ExternalPythonOperator(
-        task_id="save_margin_trading",
-        python=conf.get("core", "virtualenv"),
-        python_callable=save_margin_trading,
-        op_args=[get_db_conn, upsert_to_db, get_upsert_query, conf],
-    )
-
-    upsert_margin_trading_to_db
+margin_trading_to_parse = parse_margin_trading_after_trading()
