@@ -1,2 +1,0 @@
-2023-11-10 23:44:18 [scrapy.utils.log] INFO: Scrapy 2.11.0 started (bot: news)
-2023-11-10 23:44:18 [scrapy.utils.log] INFO: Versions: lxml 4.9.3.0, libxml2 2.10.3, cssselect 1.2.0, parsel 1.8.1, w3lib 2.1.2, Twisted 22.10.0, Python 3.11.5 (main, Sep 11 2023, 13:54:46) [GCC 11.2.0], pyOpenSSL 23.3.0 (OpenSSL 3.1.4 24 Oct 2023), cryptography 41.0.5, Platform Linux-5.15.90.1-microsoft-standard-WSL2-x86_64-with-glibc2.35

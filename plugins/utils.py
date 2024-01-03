@@ -2,6 +2,8 @@ import datetime
 import os
 import sys
 
+sys.extend(["/root/crawler"])
+
 import chardet
 import httpx
 from bs4 import BeautifulSoup

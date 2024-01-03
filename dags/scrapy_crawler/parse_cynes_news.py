@@ -1,8 +1,9 @@
 import pendulum
-from airflow.operators.bash import BashOperator
+from scrapy_crawler.utils import get_scrapy_crawl_command
+
 from airflow.decorators import dag
 from airflow.models.param import Param
-from scrapy_crawler.utils import get_scrapy_crawl_command
+from airflow.operators.bash import BashOperator
 
 today = pendulum.today().to_date_string()
 
@@ -10,7 +11,7 @@ today = pendulum.today().to_date_string()
 @dag(
     "scrapy__parse_cynes_news",
     schedule="0 21 * * *",
-    start_date=pendulum.datetime(2023, 1, 12, 9, 0, tz="Asia/Taipei"),
+    start_date=pendulum.datetime(2024, 1, 1, 9, 0, tz="Asia/Taipei"),
     catchup=False,
     tags=["Scarpy", "Cynews"],
     params={
@@ -32,6 +33,7 @@ def parse_cynes_news():
 
     command = get_scrapy_crawl_command(folder_name, folder_name, spider, args)
     parse_news = BashOperator(task_id="parse_cynes", bash_command=command)
+
     parse_news
 
 
