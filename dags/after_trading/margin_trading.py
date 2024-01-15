@@ -7,29 +7,21 @@ from airflow.decorators import dag, task
 @dag(
     "after_trading__margin_tradings",
     schedule="30 22 * * 1,2,3,4,5",
-    start_date=pendulum.datetime(2023, 11, 19, 9, 0, tz="Asia/Taipei"),
+    start_date=pendulum.datetime(2024, 1, 15, tz="Asia/Taipei"),
     tags=["after_trading"],
 )
 def parse_margin_trading_after_trading():
-    table_name = "margin_trading"
-
-    @task(task_id="create_table_if_not_exists")
-    def create_table():
-        from database import utils
-
-        utils.create_table_if_not_exists(table_name)
-
-    @task(task_id="save_margin_trading")
+    @task.external_python(
+        task_id="ingest_margin_trading_data",
+        python="/root/miniconda3/envs/crawler/bin/python3.12",
+    )
     def save_margin_trading():
-        from after_trading.processor import marging_trading
-        from after_trading.processor.utils import import_data_to_postgres
+        from crawler.base_crawler.ingestor import upsert_data
 
-        for listed in [True, False]:
-            df = marging_trading.get_listed_margin_trading_data(listed=listed)
-            if not df.empty:
-                import_data_to_postgres(table_name, df)
+        upsert_data("margin_trading", "otc")
+        upsert_data("margin_trading", "listed")
 
-    create_table() >> save_margin_trading()
+    save_margin_trading()
 
 
 margin_trading_to_parse = parse_margin_trading_after_trading()
