@@ -1,7 +1,6 @@
 import pendulum
 from airflow import DAG
 
-
 with DAG(
     "Update_inds_comps",
     # These args will get passed on to each operator
@@ -12,8 +11,8 @@ with DAG(
     catchup=False,
     tags=["industries", "companies"],
 ) as dag:
-    from airflow.operators.python import ExternalPythonOperator
     from airflow.configuration import conf
+    from airflow.operators.python import ExternalPythonOperator
     from router import get_db_conn
 
     def call_inds_scraper(get_db_conn_fnuc):
