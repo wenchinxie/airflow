@@ -1,0 +1,32 @@
+[tool.ruff]
+# Set the maximum line length to 80.
+line-length = 80
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle: check your Python code against some of the style conventions in PEP 8.
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes: check python source files for errors
+    "I",  # isort
+    "B",  # flake8-bugbear: find potential bugs or design problems
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "PL", # pylint
+    "AIR", # Airflow
+    "PD" , # pandas-vet
+    "D",  # pydocstyle
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "W191"  # indentation contains tabs
+]
+
+[tool.ruff.lint.isort]
+known-third-party = ["backtest"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

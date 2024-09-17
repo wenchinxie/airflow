@@ -1,8 +1,7 @@
 import pendulum
-from airflow.operators.bash import BashOperator
 from airflow.decorators import dag
 from airflow.models.param import Param
-from scrapy_crawler.utils import get_scrapy_crawl_command
+from airflow.operators.bash import BashOperator
 
 today = pendulum.today().to_date_string()
 
